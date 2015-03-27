@@ -3,19 +3,33 @@ var http = require('http')
 var express = require('express')
 var logger = require('morgan')
 var cors = require('cors')
+var methodOverride = require('method-override')
+var bodyParser = require('body-parser')
 var serveStatic = require('serve-static')
 var errorhandler = require('errorhandler')
+
+// Authentication module.
+var auth = require('http-auth');
+var basic = auth.basic({
+	realm: "Private Area.",
+	file: __dirname + "/../data/users.htpasswd"
+});
+
 
 module.exports = function() {
   var server = express()
 
-  // Logger
-  server.use(logger('dev', {
-    skip: function(req, res) { return req.path === '/favicon.ico' }
-  }))
+  // Don't use logger if json-server is mounted
+  if (!module.parent) {
+    server.use(logger('dev'))
+  }
 
-  // Beautify JSON
   server.set('json spaces', 2)
+  server.use(bodyParser.json({limit: '10mb'}))
+  server.use(bodyParser.urlencoded({ extended: false }))
+  server.use(methodOverride())
+
+  server.use(auth.connect(basic));
 
   // Serve static files
   if (fs.existsSync(process.cwd() + '/public')) {
@@ -32,5 +46,5 @@ module.exports = function() {
     server.use(errorhandler())
   }
 
-  return server 
+  return server
 }
