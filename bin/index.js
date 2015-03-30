@@ -36,19 +36,19 @@ var argv = yargs
 function start(object, filename) {
   var port = process.env.PORT || argv.port
   var hostname = argv.host === '0.0.0.0' ? 'localhost' : argv.host
-
+  // Print http paths to console
   for (var prop in object) {
     console.log(chalk.grey('  http://' + hostname +  ':' + port + '/') + chalk.cyan(prop))
   }
-
+  // Print server URL prompt to console
   console.log(
     '\nYou can now go to ' + chalk.grey('http://' + hostname + ':' + port + '/\n')
   )
-
+  // Print 'create db snapshot' prompt to console
   console.log(
     'Enter ' + chalk.cyan('`s`') + ' at any time to create a snapshot of the db\n'
   )
-
+  // Intitiate input steam and wait for user input; create db snapshot if 's' key is pressed
   process.stdin.resume()
   process.stdin.setEncoding('utf8')
   process.stdin.on('data', function (chunk) {
@@ -58,7 +58,7 @@ function start(object, filename) {
       console.log('\nSaved snapshot to ' + chalk.cyan(file) + '\n')
     }
   })
-
+  // Initialise middleware/routing; listen for HTTP route requests
   if (filename) {
     var router = jsonServer.router(filename)
   } else {
